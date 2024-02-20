@@ -16,3 +16,67 @@ SELECT
       total_non_fraud_trans * 100 / total_trans AS percentage_of_non_fraud_trans 
 FROM cte 
 ORDER BY percentage_of_fraud_trans DESC, percentage_of_non_fraud_trans DESC; 
+
+# Write a SQL query to find the top 5 location with the highest fraudulent transactions and its total amount and average amount during those transactions. 
+
+SELECT  
+      TOP 5 location, 
+      ROUND(SUM(amount),0) AS total_amount, 
+      ROUND(AVG(amount),2) AS average_amount 
+FROM [car_db].[dbo].[synthetic_financial_data1] 
+WHERE is_fraudulent = 1 
+GROUP BY location 
+ORDER BY total_amount DESC; 
+
+# Write a SQL query to find the top 5 location with the highest percentage of fraudulent transactions for each card-type. 
+
+ WITH cte AS( 
+      SELECT  
+            location, 
+            card_type, 
+            ROUND(SUM(amount),0) AS total_amount, 
+            ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS total_fraud_amount, 
+            DENSE_RANK() OVER(PARTITION BY card_type ORDER BY SUM(amount) DESC) AS rank 
+     FROM [car_db].[dbo].[synthetic_financial_data1]  
+     GROUP BY card_type, location 
+) 
+SELECT 
+      location, 
+      card_type, 
+      ROUND(total_fraud_amount * 100 / total_amount, 0) AS percentage_of_fraud_amount 
+FROM cte 
+WHERE rank <= 5; 
+
+# Write a SQL query to find the percentage of total fraud amount transacted and non-fraud amount transacted for each card-type. 
+
+ WITH cte AS( 
+      SELECT  
+            card_type,  
+            ROUND(SUM(amount),0) AS total_trans, 
+            ROUND(SUM(CASE WHEN is_fraudulent = 0 THEN amount END),0) AS total_non_fraud_trans,  
+            ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS total_fraud_trans   
+     FROM [car_db].[dbo].[synthetic_financial_data1]  
+     GROUP BY card_type 
+) 
+SELECT 
+      card_type, 
+      ROUND(total_fraud_trans * 100 / total_trans, 0) AS total_fraud_amount, 
+      ROUND(total_non_fraud_trans * 100 / total_trans,0) AS total_non_fraud_amount 
+FROM cte; 
+
+# Write a SQL query to find the top 5 location with the highest fraudulent activity. 
+
+ WITH cte AS( 
+      SELECT  
+            location, 
+            COUNT(transaction_id) AS total_trans, 
+            SUM(CASE WHEN is_fraudulent = 1 THEN 1 ELSE 0 END) AS total_fraud_trans 
+      FROM [car_db].[dbo].[synthetic_financial_data1] 
+      GROUP BY location 
+) 
+SELECT  
+      TOP 5 location, 
+      total_fraud_trans * 100 / total_trans AS percentage_of_fraud_trans 
+FROM cte 
+ORDER BY percentage_of_fraud_trans DESC; 
+ 
