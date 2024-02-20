@@ -13,3 +13,24 @@ SELECT
       ROUND(total_fraud_trans * 100 / total_amount, 0) AS percent_fraud_amount 
 FROM cte 
 ORDER BY percent_fraud_amount DESC; 
+
+# Write a SQL query to find the top 5 highest amount spent during fraudulent transactions, the total number of transactions, customer age for each card-type. 
+
+WITH cte AS( 
+     SELECT  
+           card_type, 
+           customer_age, 
+           COUNT(transaction_id) AS trans_count, 
+           ROUND(SUM(amount),0) AS total_amount, 
+           DENSE_RANK() OVER(PARTITION BY card_type ORDER BY SUM(amount) DESC) AS rank 
+    FROM [car_db].[dbo].[synthetic_financial_data1] 
+    WHERE is_fraudulent = 1 
+    GROUP BY card_type, customer_age 
+) 
+SELECT  
+      card_type,  
+      customer_age, 
+      trans_count, 
+      total_amount 
+FROM cte 
+WHERE rank <= 5; 
