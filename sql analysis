@@ -1,0 +1,18 @@
+# Write a SQL query to find the total number of transactions, percentage of fraudulent transactions and percentage of non-fraudulent transactions. 
+
+ WITH cte AS( 
+      SELECT 
+          card_type, 
+          COUNT(transaction_id) AS total_trans,
+          SUM(CASE WHEN is_fraudulent = 0 THEN 1 ELSE 0 END) AS total_non_fraud_trans, 
+          SUM(CASE WHEN is_fraudulent = 1 THEN 1 ELSE 0 END) AS total_fraud_trans  
+      FROM [car_db].[dbo].[synthetic_financial_data1] 
+      GROUP BY card_type 
+) 
+SELECT  
+      card_type, 
+      total_trans, 
+      total_fraud_trans * 100 / total_trans AS percentage_of_fraud_trans, 
+      total_non_fraud_trans * 100 / total_trans AS percentage_of_non_fraud_trans 
+FROM cte 
+ORDER BY percentage_of_fraud_trans DESC, percentage_of_non_fraud_trans DESC; 
