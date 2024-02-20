@@ -34,3 +34,15 @@ SELECT
       total_amount 
 FROM cte 
 WHERE rank <= 5; 
+
+# Write a SQL query to find the hourly fraudulent transactions for each card_type.
+
+SELECT 
+     card_type,
+	COUNT(transaction_id) AS trans_count,
+	ROUND(ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) * 100 / ROUND(SUM(amount),0), 2) AS fraud_amount_percent
+FROM [car_db].[dbo].[synthetic_financial_data1]
+GROUP BY card_type, DATEADD(HOUR, DATEDIFF(HOUR, 0, transaction_time), 0);
+
+
+	  
