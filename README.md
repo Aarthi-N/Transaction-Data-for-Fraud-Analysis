@@ -1,2 +1,1 @@
-# Transaction-Data-for-Fraud-Analysis
-# SQL
+# Transaction-Data-for-Fraud-Analysis (SQL)
