@@ -1,1 +1,15 @@
+# Write a SQL query to find the percentage of fraudulent amount transacted for each purchase category. 
 
+WITH cte AS( 
+     SELECT 
+           purchase_category, 
+           ROUND(SUM(amount),0) AS total_amount, 
+           ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS total_fraud_trans 
+     FROM [car_db].[dbo].[synthetic_financial_data1]  
+     GROUP BY purchase_category 
+) 
+SELECT  
+      purchase_category, 
+      ROUND(total_fraud_trans * 100 / total_amount, 0) AS percent_fraud_amount 
+FROM cte 
+ORDER BY percent_fraud_amount DESC; 
