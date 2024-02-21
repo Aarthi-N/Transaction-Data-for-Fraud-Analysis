@@ -73,3 +73,12 @@ SELECT
 FROM cte 
 ORDER BY percentage_of_fraud_trans DESC; 
  
+# Write a SQL query to find the total amount and average amount transacted during fraudulent transactions for each card type.
+
+SELECT
+      card_type,
+	  ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS total_amount,
+	  ROUND(AVG(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS average_amount
+FROM [car_db].[dbo].[synthetic_financial_data1]
+GROUP BY card_type
+ORDER BY total_amount DESC, average_amount DESC;
