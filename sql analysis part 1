@@ -47,22 +47,15 @@ SELECT
 FROM cte 
 WHERE rank <= 5; 
 
-# Write a SQL query to find the percentage of total fraud amount transacted and non-fraud amount transacted for each card-type. 
+# Write a SQL query to find the percentage of amount transacted during fraudulent transactions out of total fraudulent amount for each card-type. 
 
- WITH cte AS( 
-      SELECT  
-            card_type,  
-            ROUND(SUM(amount),0) AS total_trans, 
-            ROUND(SUM(CASE WHEN is_fraudulent = 0 THEN amount END),0) AS total_non_fraud_trans,  
-            ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) AS total_fraud_trans   
-     FROM [car_db].[dbo].[synthetic_financial_data1]  
-     GROUP BY card_type 
-) 
-SELECT 
-      card_type, 
-      ROUND(total_fraud_trans * 100 / total_trans, 0) AS total_fraud_amount, 
-      ROUND(total_non_fraud_trans * 100 / total_trans,0) AS total_non_fraud_amount 
-FROM cte; 
+ SELECT  
+      card_type,   
+      ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) * 100 / (SELECT ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0)
+	                                                                        FROM [car_db].[dbo].[synthetic_financial_data1] )  AS fraud_amount_percent 
+FROM [car_db].[dbo].[synthetic_financial_data1]  
+GROUP BY card_type
+ORDER BY fraud_amount_percent DESC;
 
 # Write a SQL query to find the top 5 location with the highest fraudulent activity. 
 
