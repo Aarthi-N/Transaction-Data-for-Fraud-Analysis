@@ -39,10 +39,39 @@ WHERE rank <= 5;
 
 SELECT 
      card_type,
-	COUNT(transaction_id) AS trans_count,
-	ROUND(ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) * 100 / ROUND(SUM(amount),0), 2) AS fraud_amount_percent
+     COUNT(transaction_id) AS trans_count,
+     ROUND(ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END),0) * 100 / ROUND(SUM(amount),0), 2) AS fraud_amount_percent
 FROM [car_db].[dbo].[synthetic_financial_data1]
 GROUP BY card_type, DATEADD(HOUR, DATEDIFF(HOUR, 0, transaction_time), 0);
+
+# Write a SQL query to find the most used card-type for transactions.
+
+SELECT card_type
+FROM [car_db].[dbo].[synthetic_financial_data1]
+GROUP BY card_type
+HAVING COUNT(transaction_id) = (
+    SELECT MAX(trans_count)
+    FROM (
+        SELECT
+            card_type,
+	    COUNT(transaction_id) AS trans_count
+        FROM [car_db].[dbo].[synthetic_financial_data1]
+        GROUP BY card_type
+    ) AS subquery
+);
+
+# Write a SQL query to find the merchant-id having percentage of fraudulent transactions greater than 85 along with their purchase-category.
+
+SELECT 
+      merchant_id,
+      purchase_category,
+      ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END) * 100.0 / NULLIF(SUM(amount), 0), 0) AS fraud_amount_percent
+FROM [car_db].[dbo].[synthetic_financial_data1]
+GROUP BY merchant_id, purchase_category
+HAVING ROUND(SUM(CASE WHEN is_fraudulent = 1 THEN amount END) * 100.0 / NULLIF(SUM(amount), 0), 0) > 85
+ORDER BY fraud_amount_percent DESC;
+   
+-------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 	  
